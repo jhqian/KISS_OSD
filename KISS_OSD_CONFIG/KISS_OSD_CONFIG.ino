@@ -76,8 +76,10 @@ static const int16_t BAT_MAH_INCREMENT = 50;
 #include "CMeanFilter.h"
 #include "Config.h"
 
-#ifdef STEELE_PDB
+#if defined(STEELE_PDB) && !defined(PIGGY_OSD) 
 static const char KISS_OSD_VER[] PROGMEM = "steele pdb config v2.5.1";
+#elif defined(PIGGY_OSD)
+static const char KISS_OSD_VER[] PROGMEM = "piggy osd v2.5.1";
 #elif defined(BF32_MODE)
 static const char KISS_OSD_VER[] PROGMEM = "bf32 osd config v2.5";
 #else
@@ -369,7 +371,7 @@ uint8_t findCharPos(char charToFind)
 void loop() {
   uint8_t i = 0;
   static uint8_t blink_i = 1;
-  unsigned long currentMillis = millis();
+  unsigned long _millis = millis();
 
 #ifdef IMPULSERC_VTX
   /*if(oldvTxBand != vTxBand || oldvTxChannel != vTxChannel || changevTxTime > 0)
@@ -383,20 +385,24 @@ void loop() {
     }
     else
     {*/
-  vtx_process_state(millis(), vTxBand, vTxChannel);
+  vtx_process_state(_millis, vTxBand, vTxChannel);
   //}
 #endif
 
   if (_StartupTime == 0)
   {
-    _StartupTime = millis();
+    _StartupTime = _millis;
   }
 
-  if ((millis() - timer1secTime) > 500)
+  if ((_millis - timer1secTime) > 500)
   {
-    timer1secTime = millis();
+    timer1secTime = _millis;
     timer1sec = !timer1sec;
   }
+
+#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
+      if(timer1sec) steele_flash_led(_millis, 1);
+#endif
 
   if ((micros() - LastLoopTime) > minLoop)
   {
@@ -453,6 +459,10 @@ void loop() {
     #endif
 
     if (fcNotConnectedCount <= 500 && !telemetryReceived) return;
+
+#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
+      steele_flash_led(_millis, 1);
+#endif
 
     while (!OSD.notInVSync());
 
