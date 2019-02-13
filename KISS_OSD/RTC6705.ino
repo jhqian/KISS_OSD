@@ -161,10 +161,17 @@ void vtx_process_state(uint32_t currentMillis, uint8_t band, uint8_t channel)
 #endif
 
 
-#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
+#if (defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE))
+
+#if defined(STEELE_PDB_OVERRIDE_LED)
+#define LED      OD_LED_PIN
+#define LED_PORT OD_LED_PORT
+#define LED_DDR  OD_LED_DDR 
+#else
 #define LED      PINB0
 #define LED_PORT PORTB
 #define LED_DDR  DDRB
+#endif
 
 #define SET(x,y) (x|=(1<<y))
 #define TOGGLE(x,y) (x^=(1<<y))

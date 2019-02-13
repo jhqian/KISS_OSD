@@ -35,7 +35,16 @@
 
 // INTERNALS - DO NOT CHANGE
 //=============================
+//#define STEELE_PDB
+#define PIGGY_OSD
+
+#ifdef PIGGY_OSD
 #define STEELE_PDB
+#define STEELE_PDB_OVERRIDE_LED
+#define OD_LED_PIN  PIND7
+#define OD_LED_PORT PORTD
+#define OD_LED_DDR  DDRD
+#endif
 //#define STEELE_PDB_OVERRIDE
 //#define BF32_MODE
 
