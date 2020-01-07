@@ -239,4 +239,3 @@ void CMyMax7456::print_time(unsigned long time, char *time_str)
     }
     time_str[time_pos++] = 0x00;
 }
-

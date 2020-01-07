@@ -92,4 +92,3 @@ uint8_t CStickInput::CheckInputInternal(int16_t input, uint8_t smallMask, uint8_
     return smallMask;
   }
 }
-

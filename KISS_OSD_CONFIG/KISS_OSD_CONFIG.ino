@@ -61,7 +61,7 @@ static const int16_t BAT_MAH_INCREMENT = 50;
 // internals
 //=============================
 
-//#define DEBUG
+#define DEBUG
 //#define PROTODEBUG
 #define KISS_OSD_CONFIG
 
@@ -76,21 +76,20 @@ static const int16_t BAT_MAH_INCREMENT = 50;
 #include "CMeanFilter.h"
 #include "Config.h"
 
-#if defined(STEELE_PDB) && !defined(PIGGY_OSD) 
+#ifdef STEELE_PDB
 static const char KISS_OSD_VER[] PROGMEM = "steele pdb config v2.5.1";
-#elif defined(PIGGY_OSD)
-static const char KISS_OSD_VER[] PROGMEM = "piggy osd v2.5.1";
 #elif defined(BF32_MODE)
 static const char KISS_OSD_VER[] PROGMEM = "bf32 osd config v2.5";
 #else
 static const char KISS_OSD_VER[] PROGMEM = "kiss osd config v2.5.1";
 #endif
 
-#if (defined(IMPULSERC_VTX) || defined(STEELE_PDB)) && !defined(STEELE_PDB_OVERRIDE)
+#if (defined(IMPULSERC_VTX) || defined(STEELE_PDB) || defined(MY_OSD)) && !defined(STEELE_PDB_OVERRIDE)
 const uint8_t osdChipSelect          =            10;
 #else
 const uint8_t osdChipSelect          =            6;
 #endif
+
 const byte masterOutSlaveIn          =            MOSI;
 const byte masterInSlaveOut          =            MISO;
 const byte slaveClock                =            SCK;
@@ -154,7 +153,7 @@ void checkVideoMode()
 
 void setupMAX7456()
 {
-  #if (defined(IMPULSERC_VTX) || defined(STEELE_PDB)) && !defined(STEELE_PDB_OVERRIDE)
+  #if (defined(IMPULSERC_VTX) || defined(STEELE_PDB) || defined(MY_OSD)) && !defined(STEELE_PDB_OVERRIDE)
   MAX7456Setup();
   delay(100);
   #endif
@@ -186,6 +185,43 @@ void resetBlinking()
   }
 }
 
+#if defined (PIGGY_OSD) || defined(MY_OSD) || (defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE))
+
+#if defined(PIGGY_OSD) ||defined(MY_OSD)  || defined(STEELE_PDB)
+#define LED      PIND7
+#define LED_PORT PORTD
+#define LED_DDR  DDRD
+#elif defined (STEELE_PDB_REAL)
+#define LED      PINB0
+#define LED_PORT PORTB
+#define LED_DDR  DDRB
+#endif
+
+#define SET(x,y) (x|=(1<<y))
+#define TOGGLE(x,y) (x^=(1<<y))
+
+
+static int16_t ledToggle = -1;
+static unsigned long lastToggle = 0;
+
+void steele_flash_led(unsigned long currentMillis, uint8_t count)
+{
+  if(ledToggle == -1)
+  {
+    LED_DDR |= (1 << LED);
+    SET(LED_PORT, LED);
+    ledToggle = 10;
+  }
+  if (ledToggle == 0)
+    ledToggle = count * 2;
+  if (ledToggle > 0 && (currentMillis - lastToggle) > 150)
+  {
+    TOGGLE(LED_PORT, LED);
+    lastToggle = currentMillis;
+    ledToggle--;
+  }
+}
+#endif
 
 void setup()
 {
@@ -198,6 +234,14 @@ void setup()
 
   //clean used area
   while (!OSD.notInVSync());
+#ifdef UPDATE_FONT_FIRST
+steele_flash_led(500, 3);
+      cleanScreen();
+      OSD.updateFont(serialBuf);
+      setupMAX7456();
+#endif
+
+  
   cleanScreen();
 #ifdef IMPULSERC_VTX
   //Ignore setting because this is critical to making sure we can detect the
@@ -371,7 +415,7 @@ uint8_t findCharPos(char charToFind)
 void loop() {
   uint8_t i = 0;
   static uint8_t blink_i = 1;
-  unsigned long _millis = millis();
+  unsigned long currentMillis = millis();
 
 #ifdef IMPULSERC_VTX
   /*if(oldvTxBand != vTxBand || oldvTxChannel != vTxChannel || changevTxTime > 0)
@@ -385,24 +429,20 @@ void loop() {
     }
     else
     {*/
-  vtx_process_state(_millis, vTxBand, vTxChannel);
+  vtx_process_state(millis(), vTxBand, vTxChannel);
   //}
 #endif
 
   if (_StartupTime == 0)
   {
-    _StartupTime = _millis;
+    _StartupTime = millis();
   }
 
-  if ((_millis - timer1secTime) > 500)
+  if ((millis() - timer1secTime) > 500)
   {
-    timer1secTime = _millis;
+    timer1secTime = millis();
     timer1sec = !timer1sec;
   }
-
-#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
-      if(timer1sec) steele_flash_led(_millis, 1);
-#endif
 
   if ((micros() - LastLoopTime) > minLoop)
   {
@@ -459,10 +499,6 @@ void loop() {
     #endif
 
     if (fcNotConnectedCount <= 500 && !telemetryReceived) return;
-
-#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
-      steele_flash_led(_millis, 1);
-#endif
 
     while (!OSD.notInVSync());
 

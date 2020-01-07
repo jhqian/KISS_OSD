@@ -45,7 +45,7 @@ bool CSettings::cleanEEPROM()
 
 void CSettings::LoadDefaults()
 {
-  #if defined(STEELE_PDB) | defined(IMPULSERC_VTX)
+  #if defined(STEELE_PDB) || defined(IMPULSERC_VTX) || defined(PIGGY_OSD) || defined (MY_OSD)
   s.m_batWarning = 0;
   s.m_batMAH[0] = 1300; //1300 mAh by default
   s.m_batMAH[1] = 1500; //1500 mAh by default
@@ -368,7 +368,7 @@ void CSettings::UpgradeFromPreviousVersion(uint8_t ver)
     if(ver < 0x13)
     {
       s.m_vTxMaxPower = 0;
-      #ifdef STEELE_PDB
+      #if defined(STEELE_PDB) || defined (PIGGY_OSD) || defined(MY_OSD)
       s.m_stats = 2;
       #else
       s.m_stats = 1;
@@ -502,4 +502,3 @@ void CSettings::UpdateMaxWatt(int16_t maxWatt)
     WriteInt16_t(253, 254, s.m_maxWatts);
   }
 }
-

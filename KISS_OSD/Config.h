@@ -11,7 +11,7 @@
 //=============================
 #define BEERMUG
 //#define CUSTOM_TPA
-#define CROSSHAIR
+//#define CROSSHAIR
 //#define PROP_ICON
 #define _MAH_ICON
 #define WATTMETER
@@ -35,19 +35,10 @@
 
 // INTERNALS - DO NOT CHANGE
 //=============================
-//#define STEELE_PDB
-#define PIGGY_OSD
-
-#ifdef PIGGY_OSD
 #define STEELE_PDB
-#define STEELE_PDB_OVERRIDE_LED
-#define OD_LED_PIN  PIND7
-#define OD_LED_PORT PORTD
-#define OD_LED_DDR  DDRD
-#endif
 //#define STEELE_PDB_OVERRIDE
 //#define BF32_MODE
-
+#define PIGGY_OSD
 
 // vTx config
 //=============================

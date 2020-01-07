@@ -12,21 +12,16 @@
 // INTERNALS - DO NOT CHANGE
 //=============================
 
+#define UPDATE_FONT_FIRST
 //#define UPDATE_FONT_ONLY
 //#define FORCE_CLEAN_EEPROM
 //#define STEELE_PDB
 //#define STEELE_PDB_OVERRIDE
 //#define BF32_MODE
+//#define PIGGY_OSD
+#define MY_OSD
 
-#define PIGGY_OSD
-
-#ifdef PIGGY_OSD
-#define STEELE_PDB
-#define STEELE_PDB_OVERRIDE_LED
-#define OD_LED_PIN  PIND7
-#define OD_LED_PORT PORTD
-#define OD_LED_DDR  DDRD
-#endif
+#define DEBUG
 
 // vTx config
 //=============================

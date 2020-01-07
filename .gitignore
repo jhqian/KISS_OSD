@@ -5,3 +5,5 @@ bin/
 .gitattributes
 .DS_Store
 cscope.*
+*.bak
+*.hex

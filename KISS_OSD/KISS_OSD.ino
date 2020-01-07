@@ -97,7 +97,7 @@ unsigned long RCsplitChangeTime = 0;
 #endif
 
 
-#if defined(STEELE_PDB) && !defined(PIGGY_OSD) 
+#ifdef STEELE_PDB
 static const char KISS_OSD_VER[] PROGMEM = "steele pdb v2.5.1";
 #elif defined(PIGGY_OSD)
 static const char KISS_OSD_VER[] PROGMEM = "piggy osd v2.5.1";
@@ -110,13 +110,19 @@ static const char KISS_OSD_VER[] PROGMEM = "kiss osd v2.5.1";
 
 #if (defined(IMPULSERC_VTX) || defined(STEELE_PDB)) && !defined(STEELE_PDB_OVERRIDE)
 const uint8_t osdChipSelect          =            10;
+#elif defined(PIGGY_OSD)
+const uint8_t osdChipSelect          =            14;
 #else
 const uint8_t osdChipSelect          =            6;
 #endif
 const byte masterOutSlaveIn          =            MOSI;
 const byte masterInSlaveOut          =            MISO;
 const byte slaveClock                =            SCK;
+#if defined(PIGGY_OSD)
+const byte osdReset                  =            29;
+#else
 const byte osdReset                  =            2;
+#endif
 static uint8_t serialBuf[256];
 
 CMyMax7456 OSD( osdChipSelect );
@@ -180,7 +186,7 @@ void checkVideoMode()
 
 void setupMAX7456()
 {
-  #if (defined(IMPULSERC_VTX) || defined(STEELE_PDB)) && !defined(STEELE_PDB_OVERRIDE)
+  #if (defined(IMPULSERC_VTX) || (defined(STEELE_PDB)) && !defined(STEELE_PDB_OVERRIDE)) || defined (PIGGY_OSD)
   MAX7456Setup();
   delay(100);
   #endif
@@ -556,7 +562,7 @@ void loop(){
 #ifdef IMPULSERC_VTX
       if(timer1sec) vtx_flash_led(1);
 #endif
-#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
+#if defined(PIGGY_OSD) || (defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE))
       if(timer1sec) steele_flash_led(_millis, 1);
 #endif
   
@@ -745,7 +751,7 @@ void loop(){
     #ifdef SHOW_KISS_LOGO
     if(!logoDone && armed == 0 && !menuActive && !armedOnce && settings.m_IconSettings[KISS_ICON] == 1)
     {
-      #if defined(IMPULSERC_VTX) || defined(STEELE_PDB)
+      #if defined(IMPULSERC_VTX) || defined(STEELE_PDB) || defined(PIGGY_OSD)
       uint8_t logoCol = settings.COLS/2-3;
       uint8_t logoRow = settings.ROWS/2-2;
       static const char impulseRC_logo[][7] PROGMEM = { { 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xB9, 0x00 },
@@ -825,7 +831,7 @@ void loop(){
 #ifdef IMPULSERC_VTX
       vtx_flash_led(1);
 #endif
-#if defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE)
+#if defined(PIGGY_OSD) || (defined(STEELE_PDB) && !defined(STEELE_PDB_OVERRIDE))
       steele_flash_led(_millis, 1);
 #endif
 

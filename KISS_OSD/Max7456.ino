@@ -1,14 +1,28 @@
-#if defined(IMPULSERC_VTX) || defined(STEELE_PDB)
+#if defined(IMPULSERC_VTX) || defined(STEELE_PDB) || defined(PIGGY_OSD)
+
+#if defined (PIGGY_OSD)
+#define MAX7456RESET  29
+#define MAX7456SELECT 14
+#endif
+
 #ifndef MAX7456RESET
 # define MAX7456RESET  9         // RESET                     
 #endif
+#ifndef MAX7456SELECT
 # define MAX7456SELECT 10        // ss     
+#endif
 
-
+#if defined(PIGGY_OSD)
+#define DATAOUT 15              // MOSI
+#define DATAIN  16              // MISO
+#define SPICLOCK  17            // sck
+#define VSYNC 12                 // INT0
+#else
 #define DATAOUT 11              // MOSI
 #define DATAIN  12              // MISO
 #define SPICLOCK  13            // sck
 #define VSYNC 2                 // INT0
+#endif
 
 #ifndef WHITEBRIGHTNESS
   #define WHITEBRIGHTNESS 0x01
